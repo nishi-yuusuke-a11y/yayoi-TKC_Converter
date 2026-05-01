@@ -46,7 +46,7 @@ input[type=text]:focus,select:focus{outline:none;border-color:#004098;box-shadow
 .stat-card.warn .number{color:#e67e22}.stat-card.danger .number{color:#dc3545}.stat-card.ok .number{color:#28a745}
 .badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600}
 .badge-dr{background:#dbeafe;color:#1e40af}.badge-cr{background:#fce7f3;color:#9d174d}.badge-both{background:#fef3c7;color:#92400e}
-.unmapped-bg{background:#fff3e0 !important}.dup-bg{background:#fff3e0 !important}
+.unmapped-bg{background:#fff3e0 !important}.dup-bg{background:#fff3e0 !important}.reference-row{background:#f7f7f7;color:#666}.reference-row:hover{background:#f1f1f1}
 .step-panel{display:none}.step-panel.active{display:block}.text-right{text-align:right}
 .preview-tbl td{font-size:12px;padding:5px 7px}.preview-tbl th{font-size:12px;padding:7px}
 .setting-section{background:#f8faff;border:1px solid #e0e8f5;border-radius:10px;padding:20px;margin:14px 0}
@@ -130,6 +130,7 @@ input[type=text]:focus,select:focus{outline:none;border-color:#004098;box-shadow
 var journals=[],acctSetDr=new Set(),acctSetCr=new Set(),taxSet=new Set(),deptSet=new Set();
 var acctMapping={},taxMapping={},clientMapping={},deptMapping={};
 var companyName="",sortedAccounts=[],sortedTaxes=[],clientAcctList=[],sortedDepts=[];
+var importedAcctRefs=[],importedClientRefs=[];
 var currentStep=1,useDept=false,clientManagedAccts=new Set(),allParentAccounts=[];
 var SEP="|||";
 var ACCT_DEFAULTS={"現金": "1111:現金", "当座預金": "1112:当座預金", "普通預金": "1113:普通預金", "定期預金": "1114:定期預金", "受取手形": "1121:受取手形", "電子記録債権": "1124:電子記録債権", "売掛金": "1122:売掛金", "有価証券": "1125:有価証券", "その他の当座資産": "1126:その他の当座資産", "商品": "1131:商品", "製品": "1132:製品", "半製品": "1133:半製品", "原材料": "1134:原材料", "仕掛品（半成品）": "1135:仕掛品（半成品）", "貯蔵品": "1136:貯蔵品", "前渡金": "1151:前渡金", "前払費用": "1152:前払費用", "繰延税金資産": "1265:繰延税金資産", "短期貸付金": "1153:短期貸付金", "未収入金": "1154:未収入金", "未収還付法人税等": "1162:未収還付法人税等", "立替金": "1155:立替金", "仮払金": "1156:仮払金", "仮払消費税等": "1164:仮払消費税等", "不渡手形": "1158:不渡手形", "不渡電子記録債権": "1168:不渡電子記録債権", "その他の流動資産": "1159:その他の流動資産", "貸倒引当金": "1259:貸倒引当金", "建物": "1211:建物", "建物付属設備": "1218:建物付属設備", "構築物": "1212:構築物", "機械及び装置": "1213:機械及び装置", "船舶": "1214:船舶", "車両運搬具": "1215:車両運搬具", "工具器具備品": "1216:工具、器具及び備品", "土地": "1221:土地", "リース資産": "1223:リース資産", "建設仮勘定": "1222:建設仮勘定", "その他の有形固定資産": "1224:その他の有形固定資産", "減価償却累計額": "1225:減価償却累計額", "のれん": "1231:のれん", "借地権": "1233:借地権", "ソフトウェア": "1237:ソフトウェア", "電話加入権": "1236:電話加入権", "投資有価証券": "1252:投資有価証券", "出資金": "1251:出資金", "敷金": "1255:敷金", "長期貸付金": "1256:長期貸付金", "長期前払費用": "1257:長期前払費用", "資金諸口": "9991:資金諸口", "資金外諸口": "9992:資金外諸口", "支払手形": "2111:支払手形", "電子記録債務": "2144:電子記録債務", "買掛金": "2112:買掛金", "短期借入金": "2113:短期借入金", "１年以内返済長期借入金": "2135:１年以内返済長期借入金", "未払金": "2114:未払金", "未払費用": "2115:未払費用", "未払法人税等": "2125:未払法人税等", "未払消費税等": "2136:未払消費税等", "繰延税金負債": "2265:繰延税金負債", "前受金": "2116:前受金", "預り金": "2117:預り金", "前受収益": "2118:前受収益", "仮受金": "2119:仮受金", "仮受消費税等": "2164:仮受消費税等", "割引手形": "2122:割引手形", "割引電子記録債権": "2132:割引電子記録債権", "賞与引当金": "2126:賞与引当金", "その他の流動負債": "2129:その他の流動負債", "社債": "2216:社債", "長期借入金": "2212:長期借入金", "長期未払金": "2219:長期未払金", "退職給付引当金": "2214:退職給付引当金", "その他の固定負債": "2215:その他の固定負債", "資本金": "3111:資本金", "資本準備金": "3211:資本準備金", "資本金資本準備金減少差益": "3341:資本金資本準備金減少差益", "自己株式処分差益": "3342:自己株式処分差益", "利益準備金": "3212:利益準備金", "別途積立金": "3311:別途積立金", "積立金": "3312:積立金", "繰越利益剰余金": "3331:繰越利益剰余金", "自己株式": "3511:自己株式", "その他有価証券評価差額金": "3411:その他有価証券評価差額金", "繰延ヘッジ損益": "3421:繰延ヘッジ損益", "新株予約権": "3611:新株予約権", "売上高": "4111:売上高", "売上値引高": "4115:売上値引戻り高", "期首棚卸高": "5111:期首棚卸高", "仕入高": "5211:商品仕入高", "仕入値引戻し高": "5213:仕入値引戻し高", "他勘定振替高": "5473:他勘定振替高", "期末棚卸高": "5311:期末棚卸高", "給料手当": "6111:販売員給与", "旅費交通費": "6112:販売員旅費", "広告宣伝費": "6113:広告宣伝費", "容器包装費": "6114:容器包装費", "荷造運賃": "6115:発送配達費", "販売促進費": "6117:その他の販売費", "役員報酬": "6211:役員報酬", "事務員給与": "6212:事務員給与", "従業員賞与": "6213:従業員賞与", "法定福利費": "6312:法定福利費", "福利厚生費": "6226:厚生費", "減価償却費": "6214:減価償却費", "リース料": "6234:リース料", "地代家賃": "6215:地代家賃", "修繕費": "6216:修繕費", "事務用品費": "6217:事務用消耗品費", "通信費": "6218:通信交通費", "水道光熱費": "6219:水道光熱費", "租税公課": "6221:租税公課", "寄付金": "6222:寄付金", "交際費": "6223:接待交際費", "保険料": "6224:保険料", "消耗品費": "6225:備品消耗品費", "管理諸費": "6227:管理諸費", "貸倒償却": "7514:貸倒償却", "雑費": "6231:雑費", "受取利息": "7111:受取利息", "受取配当金": "7114:受取配当金", "雑収入": "7118:雑収入", "支払利息": "7511:支払利息", "手形売却損": "7518:手形売却損", "繰延資産償却": "7515:繰延資産償却", "雑損失": "7519:雑損失", "固定資産売却益": "8111:固定資産売却益", "前期損益修正益": "8114:前期損益修正益", "固定資産売却損": "8211:固定資産売却損", "前期損益修正損": "8214:前期損益修正損", "法人税、住民税及び事業税": "8311:法人税、住民税及び事業税", "過年度法人税等": "8321:過年度法人税等", "法人税等調整額": "8312:法人税等調整額", "当期純利益（損失）": "9111:当期純利益（損失）", "繰越利益剰余金期首残高": "9211:繰越利益剰余金期首残高", "過年度税効果調整額": "9212:過年度税効果調整額", "積立金取崩額": "9311:積立金取崩額", "利益準備金取崩額": "9321:利益準備金取崩額", "自己株式処分差損・消却額": "9322:自己株式処分差損・消却額", "利益剰余金配当額": "9411:利益剰余金配当額", "利益準備金積立額": "9511:利益準備金積立額", "積立金積立額": "9521:積立金積立額", "繰越利益剰余金期末残高": "9611:繰越利益剰余金期末残高", "期首材料棚卸高": "5411:期首材料棚卸高", "[製]材料仕入高": "5412:材料仕入高", "期末材料棚卸高": "5413:期末材料棚卸高", "[製]給料手当": "5431:賃金", "[製]賞与": "5432:賞与", "[製]雑給": "5433:雑給", "[製]法定福利費": "5434:法定福利費", "[製]厚生費": "5435:厚生費", "[製]退職金": "5438:退職金", "[製]外注加工費": "5441:外注加工費", "[製]電力費": "5451:電力費", "[製]ガス代": "5452:ガス代", "[製]水道料": "5453:水道料", "[製]荷造運賃": "5454:運賃", "[製]減価償却費": "5455:減価償却費", "[製]リース料": "5468:リース料", "[製]修繕費": "5456:修繕費", "[製]租税公課": "5457:租税公課", "[製]賃借料": "5458:賃借料", "[製]保険料": "5459:保険料", "[製]消耗品費": "5461:消耗品費", "[製]旅費交通費": "5462:旅費", "[製]交通費": "5463:交通費", "[製]通信費": "5464:通信費", "[製]雑費": "5467:雑費", "期首仕掛品棚卸高": "5471:期首仕掛品棚卸高", "期末仕掛品棚卸高": "5472:期末仕掛品棚卸高"};
@@ -191,7 +192,7 @@ function doImport(){var file=fi.files[0];if(!file){showFlash("ファイルを選
 
 function parseYayoi(rows){
   journals=[];acctSetDr=new Set();acctSetCr=new Set();taxSet=new Set();deptSet=new Set();
-  acctMapping={};taxMapping={};clientMapping={};deptMapping={};companyName="";
+  acctMapping={};taxMapping={};clientMapping={};deptMapping={};importedAcctRefs=[];importedClientRefs=[];companyName="";
   var headerIdx=-1;
   for(var i=0;i<Math.min(30,rows.length);i++){var v=s(rows[i][0]);if(v==="日付"){headerIdx=i;break;}if(v.indexOf("事業所名")>=0)companyName=s(rows[i][1]);}
   if(headerIdx<0){showFlash("「日付」ヘッダーが見つかりません。","error");return;}
@@ -240,7 +241,33 @@ function renderStep2(){var opts='<option value="">-- 選択 --</option>';allPare
 function saveStep2(){clientAcctList=[];for(var i=0;i<15;i++){clientAcctList.push(document.getElementById("ca_"+i).value||"");}clientManagedAccts=new Set();clientAcctList.forEach(function(a){if(a)clientManagedAccts.add(a);});useDept=document.querySelector('input[name=deptMgmt]:checked').value==="yes";renderSteps();}
 
 // STEP 3 with sub-code auto-increment
-function getFilteredAccounts(){return sortedAccounts.filter(function(a){return !(a.sub&&clientManagedAccts.has(a.acct));});}
+function getFilteredAccounts(){
+  var base=sortedAccounts.filter(function(a){return !(a.sub&&clientManagedAccts.has(a.acct));}).map(function(a){return {acct:a.acct,sub:a.sub,isParent:a.isParent,inDr:a.inDr,inCr:a.inCr,both:a.both,isReference:false};});
+  var seenBase={};
+  base.forEach(function(a){seenBase[a.acct+SEP+a.sub]=true;});
+  var seenImport={};
+  var extras=[];
+  (importedAcctRefs||[]).forEach(function(a){
+    if(a.sub&&clientManagedAccts.has(a.acct))return;
+    var key=a.acct+SEP+a.sub;
+    if(seenBase[key])return;
+    if(seenImport[key])return;
+    extras.push({acct:a.acct,sub:a.sub,isParent:!a.sub,inDr:false,inCr:false,both:false,isReference:true});
+    seenImport[key]=true;
+  });
+  var merged=base.concat(extras);
+  merged.sort(function(x,y){
+    var d=acctSortKey(x.acct)-acctSortKey(y.acct);
+    if(d!==0)return d;
+    if(String(x.acct)!==String(y.acct))return String(x.acct).localeCompare(String(y.acct));
+    var xs=String(x.sub||""), ys=String(y.sub||"");
+    if(xs===ys)return 0;
+    if(xs==="")return -1;
+    if(ys==="")return 1;
+    return xs.localeCompare(ys);
+  });
+  return merged;
+}
 function propagateAcctCode(parentAcct,val){var fa=getFilteredAccounts();for(var i=0;i<fa.length;i++){if(fa[i].acct===parentAcct&&fa[i].sub){var el=document.getElementById("ac_"+i);if(el&&el.value==="")el.value=val;}}}
 function propagateSubCode(startIdx,parentAcct,val){
   if(!val)return;
@@ -252,11 +279,11 @@ function propagateSubCode(startIdx,parentAcct,val){
     if(el&&el.value==="")el.value=cur;
   }
 }
-function renderAcctMapping(){var fa=getFilteredAccounts();var mapped=0;fa.forEach(function(a){if(acctMapping[a.acct+SEP+a.sub])mapped++;});var cls=mapped===fa.length?"ok":mapped>0?"warn":"danger";
-  document.getElementById("acctStats").innerHTML='<div class="stat-card '+cls+'"><div class="number">'+mapped+' / '+fa.length+'</div><div class="label">割当済み科目数</div></div>';
+function renderAcctMapping(){var fa=getFilteredAccounts();var actualCount=fa.filter(function(a){return !a.isReference;}).length;var mapped=0;fa.forEach(function(a){if(acctMapping[a.acct+SEP+a.sub])mapped++;});var cls=(actualCount>0&&mapped>=actualCount)?"ok":mapped>0?"warn":"danger";
+  document.getElementById("acctStats").innerHTML='<div class="stat-card '+cls+'"><div class="number">'+mapped+' / '+fa.length+'</div><div class="label">割当済み科目・補助科目数（参考表示含む）</div></div>';
   var h='<table><thead><tr><th>#</th><th>弥生 勘定科目</th><th>弥生 補助科目</th><th>使用区分</th><th>TKC 科目コード</th><th>TKC 補助コード</th></tr></thead><tbody>';
-  fa.forEach(function(a,i){var k=a.acct+SEP+a.sub;var m=acctMapping[k]||{code:"",sub:""};var trCls=[];if(a.both)trCls.push("both");if(a.isParent&&!a.sub)trCls.push("parent-row");if(a.sub)trCls.push("sub-row");
-    var badge="";if(a.both)badge='<span class="badge badge-both">借方・貸方</span>';else if(a.inDr)badge='<span class="badge badge-dr">借方</span>';else if(a.inCr)badge='<span class="badge badge-cr">貸方</span>';
+  fa.forEach(function(a,i){var k=a.acct+SEP+a.sub;var m=acctMapping[k]||{code:"",sub:""};var trCls=[];if(a.both)trCls.push("both");if(a.isParent&&!a.sub)trCls.push("parent-row");if(a.sub)trCls.push("sub-row");if(a.isReference)trCls.push("reference-row");
+    var badge="";if(a.isReference)badge='<span class="badge" style="background:#eceff1;color:#455a64">参考</span>';else if(a.both)badge='<span class="badge badge-both">借方・貸方</span>';else if(a.inDr)badge='<span class="badge badge-dr">借方</span>';else if(a.inCr)badge='<span class="badge badge-cr">貸方</span>';
     var ph=ACCT_DEFAULTS[a.acct]||"例:1113";
     var subVal=(a.isParent&&!a.sub&&!m.sub&&!clientManagedAccts.has(a.acct))?"Z":m.sub;
     var ocAc="";if(a.isParent&&!a.sub)ocAc=' onchange="propagateAcctCode(\''+a.acct.replace(/'/g,"\\'")+'\',this.value)"';
@@ -287,11 +314,30 @@ function saveTaxMapping(){taxMapping={};sortedTaxes.forEach(function(t,i){var co
 
 // STEP 5 with 6-digit pad, auto-increment, dup detection
 function getClientSubAccounts(){var result=[];var allKeys=new Set([...acctSetDr,...acctSetCr]);var hasBlank={};
-  clientManagedAccts.forEach(function(a){hasBlank[a]=false;});
-  allKeys.forEach(function(k){var p=k.split(SEP);if(clientManagedAccts.has(p[0])){if(p[1])result.push({acct:p[0],sub:p[1],isBlank:false});else hasBlank[p[0]]=true;}});
-  journals.forEach(function(j){if(clientManagedAccts.has(j.drAcct)&&!j.drSub)hasBlank[j.drAcct]=true;if(clientManagedAccts.has(j.crAcct)&&!j.crSub)hasBlank[j.crAcct]=true;});
-  clientManagedAccts.forEach(function(a){if(hasBlank[a])result.push({acct:a,sub:"",isBlank:true});});
-  result.sort(function(a,b){var d=acctSortKey(a.acct)-acctSortKey(b.acct);if(d!==0)return d;if(a.isBlank)return 1;if(b.isBlank)return -1;return a.sub.localeCompare(b.sub);});return result;}
+ clientManagedAccts.forEach(function(a){hasBlank[a]=false;});
+ allKeys.forEach(function(k){var p=k.split(SEP);if(clientManagedAccts.has(p[0])){if(p[1])result.push({acct:p[0],sub:p[1],isBlank:false,isReference:false});else hasBlank[p[0]]=true;}});
+ journals.forEach(function(j){if(clientManagedAccts.has(j.drAcct)&&!j.drSub)hasBlank[j.drAcct]=true;if(clientManagedAccts.has(j.crAcct)&&!j.crSub)hasBlank[j.crAcct]=true;});
+ clientManagedAccts.forEach(function(a){if(hasBlank[a])result.push({acct:a,sub:"",isBlank:true,isReference:false});});
+ var seenBase={};
+ result.forEach(function(it){seenBase[it.acct+SEP+it.sub+SEP+(it.isBlank?"1":"0")]=true;});
+ var seenImport={};
+ var extras=[];
+ (importedClientRefs||[]).forEach(function(it){
+  var key=it.acct+SEP+(it.sub||"")+SEP+(it.isBlank?"1":"0");
+  if(seenBase[key])return;
+  if(seenImport[key])return;
+  extras.push({acct:it.acct,sub:it.sub||"",isBlank:!!it.isBlank,isReference:true});
+  seenImport[key]=true;
+ });
+ var merged=result.concat(extras);
+ merged.sort(function(a,b){
+  var d=acctSortKey(a.acct)-acctSortKey(b.acct);if(d!==0)return d;
+  if(String(a.acct)!==String(b.acct))return String(a.acct).localeCompare(String(b.acct));
+  if(a.isBlank!==b.isBlank)return a.isBlank?1:-1;
+  return String(a.sub||"").localeCompare(String(b.sub||""));
+ });
+ return merged;}
+
 function onClientCodeChange(idx){
   var items=getClientSubAccounts();
   var el=document.getElementById("cl_"+idx);if(!el)return;
@@ -307,12 +353,17 @@ function onClientCodeChange(idx){
   }
 }
 function renderClientMapping(){var items=getClientSubAccounts();if(items.length===0){document.getElementById("clientTableWrap").innerHTML='<p class="hint">取引先別管理する科目が選択されていません。</p>';document.getElementById("clientNote").style.display="none";return;}
-  var dupSet=getDupSet(items);
-  var h='<table><thead><tr><th>#</th><th>弥生 勘定科目</th><th>弥生 補助科目</th><th>TKC 取引先コード</th></tr></thead><tbody>';var hasB=false;
-  items.forEach(function(it,i){var m=clientMapping[it.acct+SEP+it.sub]||(it.isBlank?"999999":"");if(it.isBlank)hasB=true;
-    var cls=dupSet.has(i)?"dup-bg":"";
-    h+='<tr class="'+cls+'"><td>'+(i+1)+'</td><td>'+it.acct+'</td><td>'+(it.isBlank?"（空白）":it.sub)+'</td><td><input type="text" id="cl_'+i+'" value="'+m+'" style="width:120px" onchange="onClientCodeChange('+i+')"></td></tr>';
-  });h+="</tbody></table>";document.getElementById("clientTableWrap").innerHTML=h;document.getElementById("clientNote").style.display="block";}
+ var dupSet=getDupSet(items.filter(function(it){return !it.isReference;}));
+ var nonRefIndex=0;
+ var h='<table><thead><tr><th>#</th><th>弥生 勘定科目</th><th>弥生 補助科目</th><th>TKC 取引先コード</th></tr></thead><tbody>';var hasB=false;
+ items.forEach(function(it,i){var m=clientMapping[it.acct+SEP+it.sub]||(it.isBlank?"999999":"");if(it.isBlank)hasB=true;
+  var cls='';
+  if(it.isReference)cls='reference-row';
+  else if(dupSet.has(nonRefIndex))cls='dup-bg';
+  if(!it.isReference)nonRefIndex++;
+  h+='<tr class="'+cls+'"><td>'+(i+1)+'</td><td>'+it.acct+'</td><td>'+(it.isBlank?"（空白）":it.sub)+'</td><td><input type="text" id="cl_'+i+'" value="'+m+'" style="width:120px" onchange="onClientCodeChange('+i+')"></td></tr>';
+ });h+="</tbody></table>";document.getElementById("clientTableWrap").innerHTML=h;document.getElementById("clientNote").style.display="block";}
+
 function saveClientMapping(){clientMapping={};var items=getClientSubAccounts();items.forEach(function(it,i){var v=document.getElementById("cl_"+i).value.trim();if(v)clientMapping[it.acct+SEP+it.sub]=v;});showFlash(Object.keys(clientMapping).length+"件の取引先割当を保存しました。","success");}
 
 // STEP 6 default 000
@@ -410,9 +461,9 @@ function exportMapping(type){var data=[];
   else if(type==="dept"){data.push(["弥生部門名","TKC部門コード"]);saveDeptMapping();data.push(["（共通部門）",deptMapping["（共通部門）"]||"000"]);sortedDepts.forEach(function(d){data.push([d,deptMapping[d]||""]);});}
   var ws=XLSX.utils.aoa_to_sheet(data);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"mapping");XLSX.writeFile(wb,type+"_mapping.xlsx");showFlash("マッピングデータを出力しました。","success");}
 function importMapping(type,input){var file=input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){try{var data=new Uint8Array(e.target.result);var wb=XLSX.read(data,{type:"array"});var ws=wb.Sheets[wb.SheetNames[0]];var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});if(rows.length<2){showFlash("データが空です。","error");return;}
-  if(type==="acct"){for(var i=1;i<rows.length;i++){var r=rows[i];var a=s(r[0]),su=s(r[1]),c=s(r[2]),sc=s(r[3]);if(c)acctMapping[a+SEP+su]={code:c,sub:sc};}renderAcctMapping();}
+  if(type==="acct"){importedAcctRefs=[];var lastAcct="";for(var i=1;i<rows.length;i++){var r=rows[i];var a=s(r[0]),su=s(r[1]),c=s(r[2]),sc=s(r[3]);if(a)lastAcct=a;var refAcct=a||lastAcct;if(refAcct){importedAcctRefs.push({acct:refAcct,sub:su||""});if(c)acctMapping[refAcct+SEP+(su||"")]={code:c,sub:sc};}}renderAcctMapping();}
   else if(type==="tax"){for(var i=1;i<rows.length;i++){var r=rows[i];var n=s(r[0]),c=s(r[1]),rt=s(r[2]),rd=s(r[3]),ex=s(r[4]),bu=s(r[5]);if(c||rt||rd||ex||bu)taxMapping[n]={code:c,rate:rt,reduced:rd,exempt:ex,business:bu};}renderTaxMapping();}
-  else if(type==="client"){for(var i=1;i<rows.length;i++){var r=rows[i];var a=s(r[0]),su=s(r[1]),c=s(r[2]);if(su==="（空白）")su="";if(c)clientMapping[a+SEP+su]=c;}renderClientMapping();}
+  else if(type==="client"){importedClientRefs=[];for(var i=1;i<rows.length;i++){var r=rows[i];var a=s(r[0]),su=s(r[1]),c=s(r[2]);var isBlank=(su==="（空白）");if(isBlank)su="";if(a){importedClientRefs.push({acct:a,sub:su,isBlank:isBlank});if(c)clientMapping[a+SEP+su]=pad6(c);}}renderClientMapping();}
   else if(type==="dept"){for(var i=1;i<rows.length;i++){var r=rows[i];var n=s(r[0]),c=s(r[1]);if(c)deptMapping[n]=c;}renderDeptMapping();}
   showFlash("マッピングを読み込みました。","success");}catch(err){showFlash("読込エラー: "+err.message,"error");}};reader.readAsArrayBuffer(file);input.value="";}
 
@@ -497,9 +548,9 @@ function exportMapping(type){var data=[];
 }
 function importMapping(type,input){var file=input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){try{var data=new Uint8Array(e.target.result);var wb=XLSX.read(data,{type:"array"});var ws=wb.Sheets[wb.SheetNames[0]];var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});if(rows.length<2){showFlash("データが空です。","error");return;}
   if(type==="step2"){var s2={taxMethod:"honzei",kaneiType:"1",useDept:false,clientAcctList:[]};for(var i=1;i<rows.length;i++){var r=rows[i];var k=s(r[0]),v=s(r[1]);if(k==="taxMethod")s2.taxMethod=v||"honzei";else if(k==="kaneiType")s2.kaneiType=v||"1";else if(k==="useDept")s2.useDept=(v==="yes");else if(k.indexOf("clientAcct_")===0){var idx=parseInt(k.split("_")[1],10);if(!isNaN(idx))s2.clientAcctList[idx]=v||"";}}renderStep2();applyStep2Settings(s2);} 
-  else if(type==="acct"){for(var i=1;i<rows.length;i++){var r=rows[i];var a=s(r[0]),su=s(r[1]),c=s(r[2]),sc=s(r[3]);if(c)acctMapping[a+SEP+su]={code:c,sub:sc};}renderAcctMapping();}
+  else if(type==="acct"){importedAcctRefs=[];var lastAcct="";for(var i=1;i<rows.length;i++){var r=rows[i];var a=s(r[0]),su=s(r[1]),c=s(r[2]),sc=s(r[3]);if(a)lastAcct=a;var refAcct=a||lastAcct;if(refAcct){importedAcctRefs.push({acct:refAcct,sub:su||""});if(c)acctMapping[refAcct+SEP+(su||"")]={code:c,sub:sc};}}renderAcctMapping();}
   else if(type==="tax"){for(var i=1;i<rows.length;i++){var r=rows[i];var n=s(r[0]),c=s(r[1]),rt=s(r[2]),rd=s(r[3]),ex=s(r[4]),bu=s(r[5]);if(c||rt||rd||ex||bu)taxMapping[n]={code:c,rate:rt,reduced:rd,exempt:ex,business:bu};}renderTaxMapping();}
-  else if(type==="client"){for(var i=1;i<rows.length;i++){var r=rows[i];var a=s(r[0]),su=s(r[1]),c=s(r[2]);if(su==="（空白）")su="";if(c)clientMapping[a+SEP+su]=c;}renderClientMapping();}
+  else if(type==="client"){importedClientRefs=[];for(var i=1;i<rows.length;i++){var r=rows[i];var a=s(r[0]),su=s(r[1]),c=s(r[2]);var isBlank=(su==="（空白）");if(isBlank)su="";if(a){importedClientRefs.push({acct:a,sub:su,isBlank:isBlank});if(c)clientMapping[a+SEP+su]=pad6(c);}}renderClientMapping();}
   else if(type==="dept"){for(var i=1;i<rows.length;i++){var r=rows[i];var n=s(r[0]),c=s(r[1]);if(c)deptMapping[n]=c;}renderDeptMapping();}
   showFlash("マッピングを読み込みました。","success");}catch(err){showFlash("読込エラー: "+err.message,"error");}};reader.readAsArrayBuffer(file);input.value="";}
 
