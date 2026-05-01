@@ -1,1 +1,0 @@
-# yayoi-TKC_Converter
